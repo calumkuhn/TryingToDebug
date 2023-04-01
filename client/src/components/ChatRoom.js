@@ -43,24 +43,33 @@ const ChatRoom = ({ roomId }) => {
     };
 
     return (
-        <div>
-            <h2>Chat Room</h2>
-            <ul>
-                {fetchedMessages.map((msg, index) => (
-                    <li key={`fetched-${index}`}>{msg.content}</li>
-                ))}
-                {messages.map((msg, index) => (
-                    <li key={`realtime-${index}`}>{msg.content}</li>
-                ))}
-            </ul>
-            <form onSubmit={handleSubmit}>
+        <div className="chat-room">
+            <h2 className="room-title">Chat Room</h2>
+            <div className="messages-container">
+                <ul className="messages-list">
+                    {fetchedMessages.map((msg, index) => (
+                        <li key={`fetched-${index}`} className="message-item">
+                            {msg.content}
+                        </li>
+                    ))}
+                    {messages.map((msg, index) => (
+                        <li key={`realtime-${index}`} className="message-item">
+                            {msg.content}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <form onSubmit={handleSubmit} className="message-form">
                 <input
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type a message..."
+                    className="message-input"
                 />
-                <button type="submit">Send</button>
+                <button type="submit" className="send-button">
+                    Send
+                </button>
             </form>
         </div>
     );
