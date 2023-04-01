@@ -17,3 +17,9 @@ exports.getMessages = async (req, res) => {
         res.status(500).json({ message: 'Error fetching messages' });
     }
 };
+
+exports.saveMessage = async (roomId, messageData) => {
+    const message = new Message({ chatRoom: roomId, ...messageData });
+    await message.save();
+    return message;
+};
