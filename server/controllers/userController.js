@@ -38,7 +38,7 @@ const login = async (req, res) => {
 
 
 const register = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
     try {
         const existingUser = await User.findOne({ username });
@@ -47,8 +47,14 @@ const register = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
+        const existingUserByEmail = await User.findOne({ email });
+
+        if (existingUserByEmail) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 12);
-        const newUser = new User({ username, password: hashedPassword });
+        const newUser = new User({ username, email, password: hashedPassword });
 
         await newUser.save();
 
@@ -59,12 +65,14 @@ const register = async (req, res) => {
         res.status(201).json({
             _id: newUser._id,
             username: newUser.username,
+            email: newUser.email,
             token,
         });
     } catch (error) {
         res.status(500).json({ message: 'Error creating user' });
     }
 };
+
 
 
 
