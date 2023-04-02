@@ -7,6 +7,8 @@ const chatRoomRoutes = require('./routes/chatRoomRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const http = require('http');
 const socketIO = require('socket.io');
+const path = require('path');
+
 
 dotenv.config();
 
@@ -25,6 +27,15 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/chatrooms', chatRoomRoutes);
 app.use('/api/messages', messageRoutes);
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../client/build')));
+
+// Catch-all handler for any requests that don't match the routes above
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
+
 
 // Set up Socket.IO
 io.on('connection', (socket) => {
