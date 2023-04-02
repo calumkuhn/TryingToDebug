@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // Add useRef import
 import ChatRoomList from '../components/ChatRoomList';
 import ChatRoom from '../components/ChatRoom';
 import io from 'socket.io-client';
@@ -9,7 +9,7 @@ const Home = () => {
     const [currentRoomId, setCurrentRoomId] = useState(null);
     const [userId, setUserId] = useState(null);
     const [username, setUsername] = useState(null); // Add this line
-    const socket = io();
+    const socketRef = useRef(); // Add this line
 
     useEffect(() => {
         // Fetch chat rooms, user ID, and username from API when the component mounts
@@ -18,6 +18,12 @@ const Home = () => {
                 // Replace with the actual API endpoint to fetch chat rooms
                 const chatRoomsResponse = await fetch('/api/chatrooms');
                 const chatRoomsData = await chatRoomsResponse.json();
+                console.log('Fetched chat rooms:', chatRoomsData);
+                if (Array.isArray(chatRoomsData)) { // Add this condition
+                    setChatRooms(chatRoomsData);
+                } else {
+                    console.error('Fetched data is not an array:', chatRoomsData);
+                }
                 setChatRooms(chatRoomsData);
 
                 // Fetch user ID and username from local storage or your preferred method
@@ -31,14 +37,16 @@ const Home = () => {
         };
         fetchData();
 
+        socketRef.current = io(); // Move socket creation inside useEffect
+
         // Add a listener for new messages from the server
-        socket.on('message', (message) => {
+        socketRef.current.on('message', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
 
         return () => {
             // Clean up the socket connection
-            socket.disconnect();
+            socketRef.current.disconnect(); // Use the ref
         };
     }, []);
 
@@ -57,7 +65,7 @@ const Home = () => {
             }
 
             setCurrentRoomId(roomId);
-            socket.emit('join', { roomId, username }); // Add this line
+            socketRef.current.emit('join', { roomId, username }); // Use the ref
         } catch (error) {
             console.error(error);
         }
@@ -65,7 +73,7 @@ const Home = () => {
 
     const handleSendMessage = (message) => {
         // Emit the sendMessage event through the socket
-        socket.emit('sendMessage', { roomId: currentRoomId, message, userId });
+        socketRef.current.emit('sendMessage', { roomId: currentRoomId, message, userId }); // Use the ref
     };
 
     return (

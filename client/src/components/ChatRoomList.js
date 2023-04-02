@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ChatRoomList = ({ chatRooms, onJoin }) => {
+const ChatRoomList = ({ chatRooms= [], onJoin }) => {
     return (
         <div>
             <h2>Chat Rooms</h2>
