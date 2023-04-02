@@ -1,8 +1,8 @@
 import { BrowserRouter, Route, Routes, Outlet, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import useAuth from './components/useAuth'; // Import the useAuth hook
+import Home from '../pages/Home';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+import useAuth from './useAuth'; // Import the useAuth hook
 
 const ProtectedRoutes = () => {
     const isAuthenticated = useAuth();

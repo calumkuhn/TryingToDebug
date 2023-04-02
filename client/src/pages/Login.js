@@ -15,7 +15,12 @@ const Login = () => {
             console.log(data);
             // Navigate to home page if login is successful
             if (data.success) {
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('userId', data._id);
+                localStorage.setItem('username', data.username);
                 window.location.href = '/';
+            }else {
+                alert(data.message || 'Login failed. Please try again.');
             }
         } catch (error) {
             console.error(error);

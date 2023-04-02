@@ -18,8 +18,25 @@ exports.getMessages = async (req, res) => {
     }
 };
 
+// Save message function
 exports.saveMessage = async (roomId, messageData) => {
-    const message = new Message({ chatRoom: roomId, ...messageData });
-    await message.save();
-    return message;
+    try {
+        const chatRoom = await ChatRoom.findById(roomId);
+        if (!chatRoom) {
+            throw new Error('Chat room not found');
+        }
+
+        const message = new Message({
+            chatRoom: roomId,
+            user: messageData.userId,
+            content: messageData.message,
+            timestamp: new Date()
+        });
+
+        await message.save();
+        return message;
+    } catch (error) {
+        console.error(`Error saving message: ${error.message}`);
+        return null;
+    }
 };

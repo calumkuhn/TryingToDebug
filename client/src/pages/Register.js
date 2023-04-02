@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import RegisterForm from '../components/RegisterForm';
 
 const Register = () => {
@@ -15,6 +15,13 @@ const Register = () => {
             console.error(error);
         }
     };
+
+    useEffect(() => {
+        const authToken = localStorage.getItem('authToken');
+        if (authToken) {
+            window.location.href = '/';
+        }
+    }, []);
 
     return (
         <div>
