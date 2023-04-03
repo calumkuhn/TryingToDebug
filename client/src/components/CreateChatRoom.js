@@ -7,10 +7,13 @@ const CreateChatRoom = ({ onChatRoomCreated }) => {
         e.preventDefault();
 
         try {
+            const authToken = localStorage.getItem('authToken');
+
             const response = await fetch('/api/chatrooms', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
                 },
                 body: JSON.stringify({ name }),
             });

@@ -9,14 +9,27 @@ const ChatRoom = ({ roomId }) => {
 
     const fetchMessages = async () => {
         try {
-            const response = await fetch(`/api/messages/chatroom/${roomId}`);
+            const authToken = localStorage.getItem('authToken');
+
+            const response = await fetch(`/api/messages/chatroom/${roomId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                },
+            });
+
             const data = await response.json();
 
-            setFetchedMessages(data);
+            if (Array.isArray(data)) {
+                setFetchedMessages(data);
+            } else {
+                console.error('data is not an array:', data);
+            }
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
     };
+
 
     useEffect(() => {
         fetchMessages();

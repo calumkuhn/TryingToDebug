@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChatRoomList from '../components/ChatRoomList';
 import ChatRoom from '../components/ChatRoom';
-import io from 'socket.io-client';
+import CreateChatRoom from '../components/CreateChatRoom';
+import { SocketContext } from '../SocketContext';
 
 const Home = () => {
     const [chatRooms, setChatRooms] = useState([]);
@@ -9,7 +10,6 @@ const Home = () => {
     const [currentRoomId, setCurrentRoomId] = useState(null);
     const [userId, setUserId] = useState(null);
     const [username, setUsername] = useState(null);
-    const socketRef = useRef(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,23 +39,18 @@ const Home = () => {
         };
         fetchData();
 
-        socketRef.current = io();
-
-        socketRef.current.on('message', (message) => {
-            setMessages((prevMessages) => [...prevMessages, message]);
-        });
-
         return () => {
-            socketRef.current.disconnect();
         };
     }, []);
 
     const handleJoin = async (roomId) => {
         try {
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`/api/chatrooms/${roomId}/join`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
                 },
                 body: JSON.stringify({ userId }),
             });
@@ -64,12 +59,19 @@ const Home = () => {
                 throw new Error('Failed to join chat room');
             }
 
+            const responseData = await response.json();
+            if (Array.isArray(responseData.messages)) {
+                setMessages(responseData.messages);
+            } else {
+                console.error('Fetched messages data is not an array:', responseData);
+            }
+
             setCurrentRoomId(roomId);
-            socketRef.current.emit('join', { roomId, username });
         } catch (error) {
             console.error(error);
         }
     };
+
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
@@ -79,18 +81,29 @@ const Home = () => {
     };
 
     const handleSendMessage = (message) => {
-        socketRef.current.emit('sendMessage', { roomId: currentRoomId, message, userId });
+    };
+
+    const handleCreateChatRoom = (newChatRoom) => {
+        setChatRooms((prevChatRooms) => [...prevChatRooms, newChatRoom]);
     };
 
     return (
-        <div>
-            <h1>Home</h1>
-            <button onClick={handleLogout}>Logout</button>
-            <ChatRoomList chatRooms={chatRooms} onJoin={handleJoin} />
-            {currentRoomId && (
-                <ChatRoom messages={messages} onSendMessage={handleSendMessage} />
+        <SocketContext.Consumer>
+            {(socket) => (
+                <div>
+                    <h1>Home</h1>
+                    <button onClick={handleLogout}>Logout</button>
+                    <CreateChatRoom onChatRoomCreated={handleCreateChatRoom} />
+                    <ChatRoomList chatRooms={chatRooms} onJoin={handleJoin} />
+                    {currentRoomId && (
+                        <ChatRoom
+                            messages={messages}
+                            onSendMessage={handleSendMessage}
+                        />
+                    )}
+                </div>
             )}
-        </div>
+        </SocketContext.Consumer>
     );
 };
 

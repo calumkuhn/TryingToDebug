@@ -1,4 +1,5 @@
 const ChatRoom = require('../models/ChatRoom');
+const Message = require('../models/Message');
 
 const createChatRoom = async (req, res) => {
     const { name } = req.body;
@@ -15,23 +16,6 @@ const createChatRoom = async (req, res) => {
     }
 };
 
-const joinChatRoom = async (req, res) => {
-    const { roomId } = req.params;
-    const { userId } = req.body;
-    try {
-        const room = await ChatRoom.findById(roomId);
-        if (!room) {
-            return res.status(404).json({ message: 'Chat room not found' });
-        }
-        if (!room.users.includes(userId)) {
-            room.users.push(userId);
-            await room.save();
-        }
-        res.status(200).json({ message: 'User joined chat room successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error joining chat room' });
-    }
-};
 
 const listChatRooms = async (req, res) => {
     try {
@@ -39,6 +23,30 @@ const listChatRooms = async (req, res) => {
         res.json(chatRooms);
     } catch (error) {
         res.status(500).json({ message: 'Error listing chat rooms' });
+    }
+};
+
+const joinChatRoom = async (req, res) => {
+    try {
+        const roomId = req.params.id;
+        const chatRoom = await ChatRoom.findById(roomId);
+
+        if (!chatRoom) {
+            res.status(404).json({ message: 'Chat room not found' });
+            return;
+        }
+
+        const userId = req.body.userId;
+        if (!chatRoom.users.includes(userId)) {
+            chatRoom.users.push(userId);
+            await chatRoom.save();
+        }
+
+        const messages = await Message.find({ chatRoom: roomId });
+
+        res.json({ message: 'Joined chat room successfully', messages: messages });
+    } catch (error) {
+        res.status(500).json({ message: 'Error joining chat room' });
     }
 };
 
