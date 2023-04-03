@@ -21,7 +21,8 @@ const io = socketIO(server, {
         methods: ['GET', 'POST'],
         allowedHeaders: ['my-custom-header'],
         credentials: true
-    }
+    },
+    pingTimeout: 30000
 });
 
 const PORT = process.env.PORT || 5001;
@@ -55,16 +56,19 @@ io.on('connection', (socket) => {
         console.log(`User ${username} joined room ${roomId}`);
         socket.join(roomId);
 
+        socket.roomId = roomId;
+        socket.username = username;
+
         // Broadcast message to the room
         socket.broadcast.to(roomId).emit('message', {
             content: `${username} has joined the chat`,
         });
 
         // Listen for sendMessage event
-        socket.on('sendMessage', async (messageData) => {
+        socket.on('sendMessage', async (message) => {
             const savedMessage = await saveMessage(roomId, {
-                userId: messageData.userId,
-                message: messageData.message
+                userId: socket.userId,
+                message: message
             });
 
             if (savedMessage) {
@@ -76,14 +80,19 @@ io.on('connection', (socket) => {
                 });
             }
         });
+    });
+    // Handle disconnect event
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
 
-        // Handle disconnect event
-        socket.on('disconnect', () => {
-            console.log('User disconnected');
+        // Retrieve roomId and username from the socket object
+        const { roomId, username } = socket;
+
+        if (roomId && username) {
             socket.broadcast.to(roomId).emit('message', {
                 content: `${username} has left the chat`,
             });
-        });
+        }
     });
 });
 

@@ -107,14 +107,10 @@ const Home = () => {
 
             // Use the socket instance to join the room
             console.log('Joining room:', roomId);
-            socket.emit('joinRoom', { roomId, username });
+            socket.emit('joinRoom', { roomId, username , userId });
 
             // Listen for new messages
             console.log('Listening for new messages');
-            socket.on('message', (message) => {
-                console.log('New message received:', message);
-                handleSendMessage(message);
-            });
         } catch (error) {
             console.error(error);
         }
@@ -129,8 +125,11 @@ const Home = () => {
 
     const handleSendMessage = (newMessage) => {
         console.log("New message received:", newMessage);
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        if (newMessage.roomId === currentRoomId) {
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+        }
     };
+
 
     const handleCreateChatRoom = (newChatRoom) => {
         setChatRooms((prevChatRooms) => [...prevChatRooms, newChatRoom]);

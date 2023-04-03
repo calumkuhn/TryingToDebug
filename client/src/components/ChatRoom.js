@@ -16,16 +16,17 @@ const ChatRoom = ({ roomId, messages, onSendMessage, username}) => {
             socket.off('message'); // Unsubscribe from the 'message' event
             socket.disconnect();
         };
-    }, [socket, roomId, username, onSendMessage]);
+    }, [ roomId, username, onSendMessage]);
 
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (message) {
-            socket.emit('sendMessage', message);
+            socket.emit('sendMessage', { roomId, message, username });
             setMessage('');
         }
     };
+
 
     return (
         <div className="chat-room">
