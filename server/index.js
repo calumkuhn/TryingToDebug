@@ -8,13 +8,22 @@ const messageRoutes = require('./routes/messageRoutes');
 const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
+const { saveMessage } = require('./controllers/messageController');
 
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+const io = socketIO(server, {
+    cors: {
+        origin: 'http://localhost:3000',
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['my-custom-header'],
+        credentials: true
+    }
+});
+
 const PORT = process.env.PORT || 5001;
 
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -52,11 +61,19 @@ io.on('connection', (socket) => {
         });
 
         // Listen for sendMessage event
-        socket.on('sendMessage', (message) => {
-            io.to(roomId).emit('message', {
-                content: message,
-                user: username,
+        socket.on('sendMessage', async (messageData) => {
+            const savedMessage = await saveMessage(roomId, {
+                userId: messageData.userId,
+                message: messageData.message
             });
+
+            if (savedMessage) {
+                io.to(roomId).emit('message', {
+                    content: savedMessage.content,
+                    user: savedMessage.user,
+                    timestamp: savedMessage.timestamp
+                });
+            }
         });
 
         // Handle disconnect event

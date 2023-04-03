@@ -14,11 +14,11 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const authToken = localStorage.getItem('authToken'); // Add this line
+                const authToken = localStorage.getItem('authToken');
 
                 const chatRoomsResponse = await fetch('/api/chatrooms', {
                     headers: {
-                        'Authorization': `Bearer ${authToken}`, // Add this line
+                        'Authorization': `Bearer ${authToken}`,
                     },
                 });
                 const chatRoomsData = await chatRoomsResponse.json();
@@ -63,15 +63,15 @@ const Home = () => {
             if (Array.isArray(responseData.messages)) {
                 setMessages(responseData.messages);
             } else {
-                console.error('Fetched messages data is not an array:', responseData);
+                console.error('Fetched messages data is not an array:',                responseData);
             }
 
             setCurrentRoomId(roomId);
         } catch (error) {
             console.error(error);
         }
+        setCurrentRoomId(roomId);
     };
-
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
@@ -80,7 +80,8 @@ const Home = () => {
         window.location.href = '/login';
     };
 
-    const handleSendMessage = (message) => {
+    const handleSendMessage = (newMessage) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
     };
 
     const handleCreateChatRoom = (newChatRoom) => {
@@ -89,7 +90,7 @@ const Home = () => {
 
     return (
         <SocketContext.Consumer>
-            {(socket) => (
+            {() => (
                 <div>
                     <h1>Home</h1>
                     <button onClick={handleLogout}>Logout</button>
@@ -97,8 +98,10 @@ const Home = () => {
                     <ChatRoomList chatRooms={chatRooms} onJoin={handleJoin} />
                     {currentRoomId && (
                         <ChatRoom
+                            roomId={currentRoomId}
                             messages={messages}
                             onSendMessage={handleSendMessage}
+                            username={username}
                         />
                     )}
                 </div>
