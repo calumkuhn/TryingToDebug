@@ -68,10 +68,11 @@ io.on('connection', (socket) => {
             });
 
             if (savedMessage) {
+                const populatedMessage = await savedMessage.populate('user', 'username').execPopulate();
                 io.to(roomId).emit('message', {
-                    content: savedMessage.content,
-                    user: savedMessage.user,
-                    timestamp: savedMessage.timestamp
+                    content: populatedMessage.content,
+                    user: populatedMessage.user,
+                    timestamp: populatedMessage.timestamp
                 });
             }
         });

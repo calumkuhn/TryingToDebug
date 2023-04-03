@@ -29,6 +29,7 @@ const listChatRooms = async (req, res) => {
 const joinChatRoom = async (req, res) => {
     try {
         const roomId = req.params.id;
+        console.log(`Request to join chat room with ID: ${roomId}`);
         const chatRoom = await ChatRoom.findById(roomId);
 
         if (!chatRoom) {
@@ -36,6 +37,7 @@ const joinChatRoom = async (req, res) => {
             return;
         }
 
+        console.log(`Found chat room: ${chatRoom}`);
         const userId = req.body.userId;
         if (!chatRoom.users.includes(userId)) {
             chatRoom.users.push(userId);
@@ -46,8 +48,10 @@ const joinChatRoom = async (req, res) => {
 
         res.json({ message: 'Joined chat room successfully', messages: messages });
     } catch (error) {
+        console.error('Error joining chat room:', error);
         res.status(500).json({ message: 'Error joining chat room' });
     }
 };
+
 
 module.exports = { createChatRoom, joinChatRoom, listChatRooms };
