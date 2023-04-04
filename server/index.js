@@ -52,12 +52,13 @@ io.on('connection', (socket) => {
     console.log('User connected');
 
     // Listen for joinRoom event
-    socket.on('joinRoom', ({ roomId, username }) => {
+    socket.on('joinRoom', ({ roomId, username , userId}) => {
         console.log(`User ${username} joined room ${roomId}`);
         socket.join(roomId);
 
         socket.roomId = roomId;
         socket.username = username;
+        socket.userId = userId;
 
         // Broadcast message to the room
         socket.broadcast.to(roomId).emit('message', {
@@ -65,14 +66,17 @@ io.on('connection', (socket) => {
         });
 
         // Listen for sendMessage event
-        socket.on('sendMessage', async (message) => {
+        socket.on('sendMessage', async ({ userId, content }) => {
+            console.log('Received message:', { userId, content });
             const savedMessage = await saveMessage(roomId, {
                 userId: socket.userId,
-                message: message
+                message: content
             });
+            console.log('Saved message:', savedMessage);
 
             if (savedMessage) {
-                const populatedMessage = await savedMessage.populate('user', 'username').execPopulate();
+                const populatedMessage = await savedMessage.populate('user', 'username');
+                console.log('Populated message:', populatedMessage);
                 io.to(roomId).emit('message', {
                     content: populatedMessage.content,
                     user: populatedMessage.user,
@@ -82,8 +86,8 @@ io.on('connection', (socket) => {
         });
     });
     // Handle disconnect event
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
+    socket.on('disconnect', (reason) => {
+        console.log('User disconnected. Reason:', reason);
 
         // Retrieve roomId and username from the socket object
         const { roomId, username } = socket;

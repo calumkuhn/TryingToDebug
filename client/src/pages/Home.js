@@ -50,8 +50,8 @@ const Home = () => {
             console.error('Socket connection error:', error);
         };
 
-        const handleDisconnect = () => {
-            console.log('Socket disconnected');
+        const handleDisconnect = (reason) => {
+            console.log('Socket disconnected. Reason:', reason);
         };
 
         const handleMessage = (message) => {
@@ -67,6 +67,7 @@ const Home = () => {
         fetchData();
 
         return () => {
+            console.log("Cleaning up useEffect in Home.js");
             socket.off('connect', handleConnect);
             socket.off('connect_error', handleConnectError);
             socket.off('disconnect', handleDisconnect);
@@ -86,17 +87,13 @@ const Home = () => {
                 body: JSON.stringify({ userId }),
             });
 
-            try {
-                if (!response.ok) {
-                    throw new Error('Failed to join chat room');
-                }
-            } catch (error) {
-                console.error(error.message);
-                // Handle the error, e.g., show an error message or redirect to another page
+            if (!response.ok) {
+                console.error('Failed to join chat room');
                 return;
             }
 
             const responseData = await response.json();
+            console.log('Response data:', responseData);
             if (Array.isArray(responseData.messages)) {
                 setMessages(responseData.messages);
             } else {
@@ -142,12 +139,7 @@ const Home = () => {
             <CreateChatRoom onChatRoomCreated={handleCreateChatRoom} />
             <ChatRoomList chatRooms={chatRooms} onJoin={handleJoin} />
             {currentRoomId && (
-                <ChatRoom
-                    roomId={currentRoomId}
-                    messages={messages}
-                    onSendMessage={handleSendMessage}
-                    username={username}
-                />
+                <ChatRoom roomId={currentRoomId} messages={messages} onSendMessage={handleSendMessage} username={username} userId={userId} />
             )}
         </div>
     );

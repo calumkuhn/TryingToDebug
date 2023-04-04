@@ -1,29 +1,42 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { SocketContext } from '../SocketContext';
 
-const ChatRoom = ({ roomId, messages, onSendMessage, username}) => {
+const ChatRoom = ({ roomId, messages, onSendMessage, username, userId}) => {
     const socket = useContext(SocketContext);
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        socket.emit('joinRoom', { roomId, username });
+        if (!socket.connected) {
+            socket.emit('joinRoom', { roomId, username });
+        }
 
         socket.on('message', (newMessage) => {
+            console.log('Incoming message:', newMessage);
             onSendMessage(newMessage);
         });
 
         return () => {
             socket.off('message'); // Unsubscribe from the 'message' event
-            socket.disconnect();
         };
-    }, [ roomId, username, onSendMessage]);
+    }, [ roomId, username, socket, onSendMessage]);
 
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log('handleSubmit called');
+        console.log('roomId:', roomId);
+        console.log('message:', message);
+        console.log('username:', username);
+        console.log('userId:', userId);
         if (message) {
-            socket.emit('sendMessage', { roomId, message, username });
-            setMessage('');
+            console.log('Emitting message:', { userId, content: message });
+            socket.emit('sendMessage', { userId, content: message }, (error) => {
+                if (error) {
+                    console.error('Failed to send message:', error);
+                } else {
+                    setMessage('');
+                }
+            });
         }
     };
 

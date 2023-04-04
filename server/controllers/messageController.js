@@ -1,5 +1,6 @@
 const Message = require('../models/Message');
 const ChatRoom = require('../models/ChatRoom');
+const mongoose = require('mongoose');
 
 exports.getMessages = async (req, res) => {
     const chatRoomId = req.params.id;
@@ -24,15 +25,16 @@ exports.saveMessage = async (roomId, messageData) => {
 
         const message = new Message({
             chatRoom: roomId,
-            user: messageData.userId,
+            user: new mongoose.Types.ObjectId(messageData.userId),
             content: messageData.message,
             timestamp: new Date()
         });
+        console.log('Constructed message:', message);
 
-        await message.save();
-        return message;
+        const savedMessage = await message.save();
+        return savedMessage;
     } catch (error) {
-        console.error(`Error saving message: ${error.message}`);
+        console.error('Error saving message:', error);
         return null;
     }
 };
