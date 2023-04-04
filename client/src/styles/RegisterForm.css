@@ -1,0 +1,30 @@
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    outline: none;
+}
+
+button[type="submit"] {
+    background-color: #1e88e5;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #1565c0;
+}

@@ -9,6 +9,7 @@ const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
 const { saveMessage } = require('./controllers/messageController');
+const Message = require('./models/Message');
 
 
 dotenv.config();
@@ -75,9 +76,18 @@ io.on('connection', (socket) => {
             console.log('Saved message:', savedMessage);
 
             if (savedMessage) {
-                const populatedMessage = await savedMessage.populate('user', 'username');
+                const populatedMessage = await Message.findById(savedMessage._id).populate('user', 'username');
                 console.log('Populated message:', populatedMessage);
-                io.to(roomId).emit('message', {
+
+                // Broadcast the message to all clients in the room (except the sender)
+                socket.broadcast.to(roomId).emit('message', {
+                    content: populatedMessage.content,
+                    user: populatedMessage.user,
+                    timestamp: populatedMessage.timestamp
+                });
+
+                // Also, send the message back to the sender
+                socket.emit('message', {
                     content: populatedMessage.content,
                     user: populatedMessage.user,
                     timestamp: populatedMessage.timestamp

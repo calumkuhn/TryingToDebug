@@ -1,5 +1,6 @@
 import React from 'react';
 import LoginForm from '../components/LoginForm';
+import "../styles/Login.css";
 
 const Login = () => {
     const handleLogin = async (username, password) => {

@@ -3,6 +3,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import useAuth from './components/useAuth'; // Import the useAuth hook
+import './styles/App.css';
+
 
 const ProtectedRoutes = () => {
     const isAuthenticated = useAuth();

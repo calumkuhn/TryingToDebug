@@ -3,6 +3,8 @@ import ChatRoomList from '../components/ChatRoomList';
 import ChatRoom from '../components/ChatRoom';
 import CreateChatRoom from '../components/CreateChatRoom';
 import { socket, SocketContext } from '../SocketContext';
+import "../styles/Home.css";
+
 
 const Home = () => {
     const [chatRooms, setChatRooms] = useState([]);
@@ -54,15 +56,9 @@ const Home = () => {
             console.log('Socket disconnected. Reason:', reason);
         };
 
-        const handleMessage = (message) => {
-            console.log('New message received:', message);
-            handleSendMessage(message);
-        };
-
         socket.on('connect', handleConnect);
         socket.on('connect_error', handleConnectError);
         socket.on('disconnect', handleDisconnect);
-        socket.on('message', handleMessage);
 
         fetchData();
 
@@ -71,7 +67,6 @@ const Home = () => {
             socket.off('connect', handleConnect);
             socket.off('connect_error', handleConnectError);
             socket.off('disconnect', handleDisconnect);
-            socket.off('message', handleMessage);
         };
     }, [socket]);
 
@@ -120,9 +115,9 @@ const Home = () => {
         window.location.href = '/login';
     };
 
-    const handleSendMessage = (newMessage) => {
+    const handleNewMessage = (newMessage) => {
         console.log("New message received:", newMessage);
-        if (newMessage.roomId === currentRoomId) {
+        if (newMessage.chatRoom === currentRoomId) {
             setMessages((prevMessages) => [...prevMessages, newMessage]);
         }
     };
@@ -133,13 +128,17 @@ const Home = () => {
     };
 
     return (
-        <div>
-            <h1>Home</h1>
-            <button onClick={handleLogout}>Logout</button>
+        <div className="home-container">
+            <div className="home-header">
+                <h1>Home</h1>
+                <button className="logout-button" onClick={handleLogout}>
+                    Logout
+                </button>
+            </div>
             <CreateChatRoom onChatRoomCreated={handleCreateChatRoom} />
             <ChatRoomList chatRooms={chatRooms} onJoin={handleJoin} />
             {currentRoomId && (
-                <ChatRoom roomId={currentRoomId} messages={messages} onSendMessage={handleSendMessage} username={username} userId={userId} />
+                <ChatRoom roomId={currentRoomId} messages={messages} onNewMessage={handleNewMessage} username={username} userId={userId} />
             )}
         </div>
     );

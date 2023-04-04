@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import RegisterForm from '../components/RegisterForm';
+import "../styles/Register.css";
 
 const Register = () => {
     const handleRegister = async (username, email, password) => {

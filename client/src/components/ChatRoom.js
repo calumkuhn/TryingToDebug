@@ -1,7 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { SocketContext } from '../SocketContext';
+import '../styles/ChatRoom.css';
 
-const ChatRoom = ({ roomId, messages, onSendMessage, username, userId}) => {
+
+const ChatRoom = ({ roomId, messages, onNewMessage, username, userId}) => {
     const socket = useContext(SocketContext);
     const [message, setMessage] = useState('');
 
@@ -12,13 +14,13 @@ const ChatRoom = ({ roomId, messages, onSendMessage, username, userId}) => {
 
         socket.on('message', (newMessage) => {
             console.log('Incoming message:', newMessage);
-            onSendMessage(newMessage);
+            onNewMessage(newMessage);
         });
 
         return () => {
             socket.off('message'); // Unsubscribe from the 'message' event
         };
-    }, [ roomId, username, socket, onSendMessage]);
+    }, [ roomId, username, socket, onNewMessage]);
 
 
     const handleSubmit = (e) => {
@@ -30,7 +32,7 @@ const ChatRoom = ({ roomId, messages, onSendMessage, username, userId}) => {
         console.log('userId:', userId);
         if (message) {
             console.log('Emitting message:', { userId, content: message });
-            socket.emit('sendMessage', { userId, content: message }, (error) => {
+            socket.emit('sendMessage', { userId, content: message, username }, (error) => {
                 if (error) {
                     console.error('Failed to send message:', error);
                 } else {
@@ -48,7 +50,7 @@ const ChatRoom = ({ roomId, messages, onSendMessage, username, userId}) => {
                 <ul className="messages-list">
                     {messages.map((msg, index) => (
                         <li key={`realtime-${index}`} className="message-item">
-                            {msg.content}
+                            {msg.user.username}: {msg.content}
                         </li>
                     ))}
                 </ul>

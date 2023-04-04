@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import "../styles/CreateChatRoom.css";
 
 const CreateChatRoom = ({ onChatRoomCreated }) => {
     const [name, setName] = useState('');
@@ -33,14 +34,14 @@ const CreateChatRoom = ({ onChatRoomCreated }) => {
     return (
         <div>
             <h2>Create a chat room</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="create-chat-room-form">
                 <input
                     type="text"
+                    placeholder="Chat room name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Chat room name"
                 />
-                <button type="submit">Create</button>
+                <button type="submit">Create Chat Room</button>
             </form>
         </div>
     );
